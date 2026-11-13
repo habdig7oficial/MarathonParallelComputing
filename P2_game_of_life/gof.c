@@ -15,7 +15,7 @@ const int SizeY = DimY * CHAR_BIT;
 const int SizeBuf = DimY * DimX * CHAR_BIT; // size of allocated buffer
 const int DimBuf = SizeY * SizeX;
 
-void print(const char *gen, unsigned int dim_y, unsigned int dim_x, unsigned int per_bit){
+void print(const char *gen, uint8_t dim_y, uint8_t dim_x, uint8_t per_bit){
     printf("%d %d \n", dim_y, dim_y);
     for(int i = 0; i < dim_y; i++){
         for(int j = 0; j < dim_x; j++){
@@ -39,27 +39,22 @@ void print(const char *gen, unsigned int dim_y, unsigned int dim_x, unsigned int
 
 
 struct Sum{
-    unsigned int res;
-    unsigned int carry;
+    uint8_t res;
+    uint8_t carry;
 };
 
-struct Sum full_adder(unsigned int a, unsigned int b, unsigned int c_in){
-    struct Sum s1 = {
-        .res = a ^ b,
-        .carry = a & b
+struct Sum full_adder(uint8_t a, uint8_t b, uint8_t c_in){
+    uint8_t ab = a ^ b;
+    struct Sum s = {
+        .res = ab ^ c_in,
+        .carry =  (a & b) | (ab & c_in)
     };
 
-    struct Sum s2 = {
-        .res = s1.res ^ c_in,
-        .carry = s1.carry & c_in
-    };
 
-    s2.carry |= s1.carry;
-
-    return s2;
+    return s;
 }
 
-void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *gen, unsigned int per_bit){
+void next(uint8_t dim_y, uint8_t dim_x, char *gen_next, const char *gen, uint8_t per_bit){
     for(int i = dim_x / per_bit; i < ((dim_y - 1) * dim_x) / per_bit; i++){
         int offset = (dim_x / per_bit); // find nex / prev columns
 
@@ -105,15 +100,15 @@ int main() {
     char *gen = (char *)malloc(SizeBuf);
     char *gen_next = (char *)malloc(SizeBuf);
 
-    /*    gen[7] = 8;
+    gen[7] = 8;
     gen[3] = 8;
     gen[5] = 8;
 
-    gen[6] = 254; */
 
-    gen[5] =  3;
-    gen[7] =  3;
+    gen[11] = 3;
+    gen[13] = 3;
 
+    //gen[6] = 254;
 
     for(int i = 0; i < G; i++){
         printf("%s %dth Generation Begins %s", SEP, i, SEP);
