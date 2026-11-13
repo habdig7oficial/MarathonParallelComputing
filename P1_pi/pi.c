@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <omp.h>
 
-double pi(long long n){
 
-    
+double pi(long long n){
     double step = 1.0 / (double)n;
     double sum = 0;
     
@@ -12,7 +11,6 @@ double pi(long long n){
         double x = (i + 0.5) * step;
         sum += 4.0 / (1.0 + x * x);
     }
-
 
     return sum;
 }

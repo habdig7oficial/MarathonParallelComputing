@@ -7,6 +7,7 @@ using namespace benchmark;
 
 
 static void BM_PIC(State& state){
+    //cout << "Threads" << opm_get_num_threads() << endl;
     for(auto _ : state)
         pi(1000);
 }
