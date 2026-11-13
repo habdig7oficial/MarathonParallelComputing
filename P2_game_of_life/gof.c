@@ -63,7 +63,29 @@ void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *ge
     for(int i = dim_x / per_bit; i < ((dim_y - 1) * dim_x) / per_bit; i++){
         int offset = (dim_x / per_bit); // find nex / prev columns
 
-        printf("(%d %d %d)", upper_plane, middle_plane, down_plane);
+        struct Sum s1 = full_adder(gen[i - offset] << 1, gen[i - offset], gen[i - offset] >> 1);
+        struct Sum s2 = full_adder(gen[i] << 1, gen[i] >> 1, gen[i + offset] << 1);
+        struct Sum s3 = full_adder(gen[i + offset], gen[i + offset] >> 1, 0); // half adder
+        
+        struct Sum stage2 = full_adder(s1.res, s2.res, s3.res);
+
+        struct Sum stage3 = full_adder(s1.carry, s2.carry, s3.carry);
+        struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+
+        char c0 = stage2.res;
+        char c1 = stage4.res;
+        char c2 = stage4.carry | stage3.carry;
+
+
+        int is2or3 = ~c2 & c1;
+
+
+        char survives = gen[i] & is2or3;
+        char biths = ~gen[i] & (is2or3 & c0); // is 3
+
+        gen_next[i] = survives | biths;
+
+        printf("(%d %d) ", stage2.res, stage2.carry);
     }
 }
 
@@ -83,11 +105,15 @@ int main() {
     char *gen = (char *)malloc(SizeBuf);
     char *gen_next = (char *)malloc(SizeBuf);
 
-    gen[1] = 8;
+    /*    gen[7] = 8;
     gen[3] = 8;
-    gen[5] = 9;
+    gen[5] = 8;
 
-    gen[6] = 254;
+    gen[6] = 254; */
+
+    gen[5] =  3;
+    gen[7] =  3;
+
 
     for(int i = 0; i < G; i++){
         printf("%s %dth Generation Begins %s", SEP, i, SEP);
