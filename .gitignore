@@ -1,3 +1,5 @@
 ./benchmark
 *.json
 pi_elf
+life
+*.env

@@ -3,6 +3,8 @@ CXX = g++
 
 compile: 
 	$(C) P1_pi/pi.c -o pi_elf -c -fPIC
+	#$(C) P2_game_of_life/gof.c -o pi_elf -c -fPIC
+	$(C) P2_game_of_life/gof.c -o life
 
 benchmark: compile
 	$(CXX) trigger.cpp pi_elf -std=c++17 -march=native -O3 -o benchmark -lbenchmark
