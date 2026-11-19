@@ -1,25 +1,18 @@
 #include "P1_pi/pi.h"
+#include "P2_game_of_life/gof.h"
+#include "P2_game_of_life/constants.h"
+
 #include "benchmark/registration.h"
 #include "benchmark/state.h"
 #include "omp.h"
+
+
+
+#include "benchmarks/pi_benchmark.hpp"
+#include "benchmarks/gof_benchmark.hpp"
 
 using namespace std;
 using namespace benchmark;
 
 
-static void BM_PIC1(State& state){ for(auto _ : state) pi(1000, 1); }
-static void BM_PIC2(State& state){ for(auto _ : state) pi(1000, 2); }
-static void BM_PIC4(State& state){ for(auto _ : state) pi(1000, 4); }
-static void BM_PIC8(State& state){ for(auto _ : state) pi(1000, 8); }
-static void BM_PIC16(State& state){ for(auto _ : state) pi(1000, 16); }
-
-
-
-
-
-BENCHMARK(BM_PIC1);
-BENCHMARK(BM_PIC2);
-BENCHMARK(BM_PIC4);
-BENCHMARK(BM_PIC8);
-BENCHMARK(BM_PIC16);
 BENCHMARK_MAIN();

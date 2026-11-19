@@ -1,19 +1,9 @@
 #include "limits.h"
 #include "stdlib.h"
 #include "stdio.h"
-
-#define G 10
-#define DimX 2
-#define DimY 1
-
-#define SEP "\n=================\n"
+#include "constants.h"
 
 
-const int SizeX = DimX * CHAR_BIT;
-const int SizeY = DimY * CHAR_BIT;
-
-const int SizeBuf = DimY * DimX * CHAR_BIT; // size of allocated buffer
-const int DimBuf = SizeY * SizeX;
 
 void print(const char *gen, uint8_t dim_y, uint8_t dim_x, uint8_t per_bit){
     printf("%d %d \n", dim_y, dim_y);
@@ -91,25 +81,7 @@ void process(char *gen_next, const char *gen){
 }
 
 
-int main() {
-    printf("%d", SizeX);
-    printf("%s Board Size:\n", SEP);
-    printf("size x: %d (%d u8)\nsize y: % (%d u8)\n",  SizeX, DimX, SizeY, DimY);
-    printf("Total Size: %d (%d u8)%s", DimBuf, SizeBuf, SEP);
-
-    char *gen = (char *)malloc(SizeBuf);
-    char *gen_next = (char *)malloc(SizeBuf);
-
-    gen[7] = 8;
-    gen[3] = 8;
-    gen[5] = 8;
-
-
-    gen[11] = 3;
-    gen[13] = 3;
-
-    //gen[6] = 254;
-
+void print_gen(char *gen, char *gen_next){
     for(int i = 0; i < G; i++){
         printf("%s %dth Generation Begins %s", SEP, i, SEP);
 
@@ -121,8 +93,5 @@ int main() {
         gen = gen_next;
         gen_next = aux;
     }
-
-    //printf("%d", SizeBuf);
-
 
 }
