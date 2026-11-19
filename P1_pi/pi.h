@@ -1,3 +1,3 @@
 extern "C" {
-    double pi(long long);
+    double pi(long long, unsigned int);
 }

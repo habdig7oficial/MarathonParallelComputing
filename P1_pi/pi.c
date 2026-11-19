@@ -2,9 +2,11 @@
 #include <omp.h>
 
 
-double pi(long long n){
+double pi(long long n, unsigned int threads){
     double step = 1.0 / (double)n;
     double sum = 0;
+
+    omp_set_num_threads(threads);
     
     #pragma omp parallel for reduction(+:sum) 
     for(long long i = 0; i < n; i++){
