@@ -2,7 +2,9 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "constants.h"
+#include "omp.h"
 
+#include "stdbool.h"
 
 
 void print(const char *gen, uint8_t dim_y, uint8_t dim_x, uint8_t per_bit){
@@ -45,6 +47,7 @@ struct Sum full_adder(uint8_t a, uint8_t b, uint8_t c_in){
 }
 
 void next(uint8_t dim_y, uint8_t dim_x, char *gen_next, const char *gen, uint8_t per_bit){
+    #pragma omp parallel for
     for(int i = dim_x / per_bit; i < ((dim_y - 1) * dim_x) / per_bit; i++){
         int offset = (dim_x / per_bit); // find nex / prev columns
 
@@ -70,22 +73,25 @@ void next(uint8_t dim_y, uint8_t dim_x, char *gen_next, const char *gen, uint8_t
 
         gen_next[i] = survives | biths;
 
-        printf("(%d %d) ", stage2.res, stage2.carry);
+        //printf("(%d %d) ", stage2.res, stage2.carry);
     }
 }
 
 
 void process(char *gen_next, const char *gen){
-    print(gen, SizeY, SizeX, CHAR_BIT);
+    //print(gen, SizeY, SizeX, CHAR_BIT);
     next(SizeY, SizeX, gen_next, gen, CHAR_BIT);
 }
 
 
-void print_gen(char *gen, char *gen_next){
-    for(int i = 0; i < G; i++){
-        printf("%s %dth Generation Begins %s", SEP, i, SEP);
+void print_gen(char *gen, char *gen_next, unsigned int threads){
 
-        printf("%p %p", gen, gen_next);
+    omp_set_num_threads(threads);
+
+    for(int i = 0; i < G; i++){
+        //printf("%s %dth Generation Begins %s", SEP, i, SEP);
+
+        //printf("%p %p", gen, gen_next);
         process(gen_next, gen);
 
         char *aux;

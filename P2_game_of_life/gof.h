@@ -3,7 +3,7 @@
 
 
 extern "C" {
-    void print_gen(char *, char *);
+    void print_gen(char *, char *, unsigned int);
     void print(const char *, uint8_t, uint8_t, uint8_t);
     void next(uint8_t, uint8_t, char *, const char *, uint8_t);
 }
