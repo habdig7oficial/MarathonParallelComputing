@@ -5,6 +5,7 @@
 #include "omp.h"
 
 #include "stdbool.h"
+#include <stdint.h>
 
 
 void print(const char *gen, uint8_t dim_y, uint8_t dim_x, uint8_t per_bit){

@@ -1,5 +1,6 @@
 #include "limits.h"
 #include "stdlib.h"
+#include <stdint.h>
 
 
 extern "C" {
