@@ -23,9 +23,7 @@ void free_board(cell_t **b, int n) {
     free(b);
 }
 
-int adjacent_to(cell_t **b, int n, int i, int j, unsigned int threads) {
-    omp_set_num_threads(threads);
-
+int adjacent_to(cell_t **b, int n, int i, int j) {
     int sk = (i > 0) ? i - 1 : i;
     int ek = (i + 1 < n) ? i + 1 : i;
     int sl = (j > 0) ? j - 1 : j;
@@ -43,11 +41,13 @@ int adjacent_to(cell_t **b, int n, int i, int j, unsigned int threads) {
 
 void play(cell_t **cur, cell_t **nxt, int n, unsigned int threads) {
     int i, j;
+      
+    omp_set_num_threads(threads);
 
     #pragma omp parallel for collapse(2) private(i, j)
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
-            int a = adjacent_to(cur, n, i, j, threads);
+            int a = adjacent_to(cur, n, i, j);
             if (a == 2) {
                 nxt[i][j] = cur[i][j];
             } else if (a == 3) {
