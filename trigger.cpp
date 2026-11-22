@@ -5,7 +5,7 @@
 #include "benchmark/registration.h"
 #include "benchmark/state.h"
 #include "omp.h"
-
+#include "random"
 
 
 #include "benchmarks/pi_benchmark.hpp"
@@ -15,4 +15,16 @@ using namespace std;
 using namespace benchmark;
 
 
-BENCHMARK_MAIN();
+unsigned int seed;
+
+int main(int argc, char *argv[]){
+    Initialize(&argc, argv);
+
+    random_device rd;
+    seed = rd();
+
+    AddCustomContext("seed", to_string(seed));
+
+    RunSpecifiedBenchmarks();
+    Shutdown();
+}
