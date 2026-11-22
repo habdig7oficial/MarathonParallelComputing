@@ -18,5 +18,5 @@ static void BM_GOF(State& state){
     free(gen_next);
 }
 
-BENCHMARK(BM_GOF) -> ThreadRange(1, 2);
+BENCHMARK(BM_GOF) -> ThreadRange(1, thread::hardware_concurrency());
 

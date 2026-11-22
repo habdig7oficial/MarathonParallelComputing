@@ -15,4 +15,4 @@ static void BM_PIC(State& state){
         DoNotOptimize(pi_val);
     }
 }
-BENCHMARK(BM_PIC) -> ThreadRange(1, thread::hardware_concurrency());
+//BENCHMARK(BM_PIC) -> ThreadRange(1, thread::hardware_concurrency());
