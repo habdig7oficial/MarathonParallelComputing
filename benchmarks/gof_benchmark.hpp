@@ -1,23 +1,18 @@
 
 #pragma once
 #include "benchmark/registration.h"
+#include "thread"
 
-static void BM_GOF1(State& state){ 
+using namespace std;
+using namespace benchmark;
+
+static void BM_GOF(State& state){ 
     char *gen = (char *)malloc(SizeBuf);
     char *gen_next = (char *)malloc(SizeBuf);
 
     for(auto _ : state) 
-        print_gen(gen, gen_next, 1); 
+        print_gen(gen, gen_next); 
 }
 
-BENCHMARK(BM_GOF1);
+//BENCHMARK(BM_GOF) -> ThreadRange(1, thread::hardware_concurrency());
 
-static void BM_GOF2(State& state){ 
-    char *gen = (char *)malloc(SizeBuf);
-    char *gen_next = (char *)malloc(SizeBuf);
-
-    for(auto _ : state) 
-        print_gen(gen, gen_next, 1); 
-}
-
-BENCHMARK(BM_GOF2);

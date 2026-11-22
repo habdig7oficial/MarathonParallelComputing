@@ -1,17 +1,11 @@
 #pragma once
 #include "benchmark/registration.h"
+#include "thread"
 
 using namespace benchmark;
+using namespace std;
 
-static void BM_PIC1(State& state){ for(auto _ : state) pi(1000, 1); }
-static void BM_PIC2(State& state){ for(auto _ : state) pi(1000, 2); }
-static void BM_PIC4(State& state){ for(auto _ : state) pi(1000, 4); }
-static void BM_PIC8(State& state){ for(auto _ : state) pi(1000, 8); }
-static void BM_PIC16(State& state){ for(auto _ : state) pi(1000, 16); }
+#define SHOTS 100000
 
-/**
-BENCHMARK(BM_PIC1);
-BENCHMARK(BM_PIC2);
-BENCHMARK(BM_PIC4);
-BENCHMARK(BM_PIC8);
-BENCHMARK(BM_PIC16); */
+static void BM_PIC(State& state){ for(auto _ : state) pi(SHOTS); }
+BENCHMARK(BM_PIC) -> ThreadRange(1, thread::hardware_concurrency());
