@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <omp.h>
-
+#include <stdint.h>
 
 double pi(long long n){
     double step = 1.0 / (double)n;
