@@ -3,3 +3,5 @@
 pi_elf
 life
 *.env
+./benchmark
+./life
