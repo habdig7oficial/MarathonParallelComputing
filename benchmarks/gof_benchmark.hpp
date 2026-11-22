@@ -14,6 +14,10 @@ static void BM_GOF(State& state){
     for(auto _ : state) {
         int threads = static_cast<int>(state.range(0));
         print_gen(gen, gen_next, threads, threads * 32);
+
+        DoNotOptimize(gen);
+        DoNotOptimize(gen_next);
+        ClobberMemory();
     } 
 
     free(gen);
