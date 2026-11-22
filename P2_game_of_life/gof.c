@@ -47,11 +47,11 @@ struct Sum full_adder(uint8_t a, uint8_t b, uint8_t c_in){
     return s;
 }
 
-void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *gen, uint8_t per_bit, unsigned int threads){
+void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *gen, uint8_t per_bit, unsigned int threads, unsigned int tile){
    
     omp_set_num_threads(threads);
 
-   #pragma omp parallel for 
+   #pragma omp parallel for schedule(guided)
     for(int i = dim_x / per_bit; i < ((dim_y - 1) * dim_x) / per_bit; i++){
         int offset = (dim_x / per_bit); // find nex / prev columns
 
@@ -79,22 +79,21 @@ void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *ge
 
         //printf("(%d %d) ", stage2.res, stage2.carry);
     }
-    #pragma omp barrier
 }
 
 
-void process(char *gen_next, const char *gen, unsigned int threads){
+void process(char *gen_next, const char *gen, unsigned int threads, unsigned int tile){
     //print(gen, SizeY, SizeX, CHAR_BIT);
-    next(SizeY, SizeX, gen_next, gen, CHAR_BIT, threads);
+    next(SizeY, SizeX, gen_next, gen, CHAR_BIT, threads, tile);
 }
 
 
-void print_gen(char *gen, char *gen_next, unsigned int threads){
+void print_gen(char *gen, char *gen_next, unsigned int threads, unsigned int tile){
     for(int i = 0; i < G; i++){
         //printf("%s %dth Generation Begins %s", SEP, i, SEP);
 
         //printf("%p %p", gen, gen_next);
-        process(gen_next, gen, threads);
+        process(gen_next, gen, threads, tile);
 
         char *aux;
         aux = gen;

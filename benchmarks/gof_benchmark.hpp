@@ -11,8 +11,10 @@ static void BM_GOF(State& state){
     char *gen = (char *)malloc(SizeBuf);
     char *gen_next = (char *)malloc(SizeBuf);
 
-    for(auto _ : state) 
-        print_gen(gen, gen_next, static_cast<int>(state.range(0))); 
+    for(auto _ : state) {
+        int threads = static_cast<int>(state.range(0));
+        print_gen(gen, gen_next, threads, threads * 32);
+    } 
 
     free(gen);
     free(gen_next);

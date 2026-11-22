@@ -1,6 +1,6 @@
 #define G 10
-#define DimX 50
-#define DimY 50
+#define DimX 100
+#define DimY 100
 
 #define SEP "\n=================\n"
 
