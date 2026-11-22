@@ -19,9 +19,10 @@ endif
 compile: 
 	$(C) $(CFLAGS) P1_pi/pi.c -o pi_elf -c -fPIC
 	$(C) $(CFLAGS) P2_game_of_life/gof.c -o life -c -fPIC
+	$(C) $(CFLAGS) P2_game_of_life/jean_gof.c -o life_jean -c -fPIC
 
 benchmark: compile
-	$(CXX) $(CFLAGS) trigger.cpp pi_elf life -std=c++17 -march=native -O3 -o benchmark -lbenchmark
+	$(CXX) $(CFLAGS) trigger.cpp pi_elf life life_jean -std=c++17 -march=native -O3 -o benchmark -lbenchmark
 
 run_final: benchmark
 	./benchmark --benchmark_min_warmup_time=2 --benchmark_repetitions=40 --benchmark_report_aggregates_only=true --benchmark_out=benchmark.json --benchmark_out_format=json
