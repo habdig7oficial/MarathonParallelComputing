@@ -6,7 +6,7 @@
 using namespace benchmark;
 using namespace std;
 
-#define SHOTS 100000
+#define SHOTS 1000000
 
 static void BM_PIC(State& state){ 
     for(auto _ : state) {
