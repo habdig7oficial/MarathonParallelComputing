@@ -24,7 +24,8 @@ benchmark: compile
 	$(CXX) $(CFLAGS) trigger.cpp pi_elf life -std=c++17 -march=native -O3 -o benchmark -lbenchmark
 
 run_final: benchmark
-	./benchmark --benchmark_min_warmup_time=2 --benchmark_repetitions=40 --benchmark_report_aggregates_only=true --benchmark_out=benchmark.json --benchmark_out_format=json
+	./benchmark --benchmark_min_warmup_time=2 --benchmark_repetitions=6 --benchmark_out=benchmark.json --benchmark_out_format=json
+	python3 resumir.py
 
 run_test: benchmark
 	./benchmark --benchmark_min_warmup_time=1 --benchmark_repetitions=10 --benchmark_report_aggregates_only=true --benchmark_out=benchmark.json --benchmark_out_format=json

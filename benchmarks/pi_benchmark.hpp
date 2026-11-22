@@ -15,4 +15,5 @@ static void BM_PIC(State& state){
         DoNotOptimize(pi_val);
     }
 }
-BENCHMARK(BM_PIC) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime();
+// P = 1, 2, 4 e 6 threads, como pede o caderno (Regras do jogo)
+BENCHMARK(BM_PIC) -> Arg(1) -> Arg(2) -> Arg(4) -> Arg(6) -> UseRealTime() -> Unit(kMillisecond);
