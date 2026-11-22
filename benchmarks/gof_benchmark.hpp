@@ -34,4 +34,5 @@ static void BM_GOF(State& state){
     free(gen_next);
 }
 
-BENCHMARK(BM_GOF) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime();
+//BENCHMARK(BM_GOF) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime();
+BENCHMARK(BM_GOF) -> DenseRange(1, 2) -> UseRealTime();

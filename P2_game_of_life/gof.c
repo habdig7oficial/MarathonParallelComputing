@@ -83,7 +83,7 @@ void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *ge
 
 
 void process(char *gen_next, const char *gen, unsigned int threads, unsigned int tile){
-    //print(gen, SizeY, SizeX, CHAR_BIT);
+    print(gen, SizeY, SizeX, CHAR_BIT);
     next(SizeY, SizeX, gen_next, gen, CHAR_BIT, threads, tile);
 }
 
