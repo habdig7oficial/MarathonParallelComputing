@@ -7,10 +7,10 @@ LIB_FLAGS_LINK= /opt/homebrew/opt/libomp/lib/
 
 UNAME := $(shell uname -s)
 
-CFLAGS ?= -O3 -Wall 
+CFLAGS ?= -march=native -O3 -Wall 
 
 ifeq ($(UNAME),Darwin)
-	CFLAGS += -Xclang -fopenmp -I$(LIB_FLAGS) -L$(LIB_FLAGS_LINK) -lomp 
+	CFLAGS += -Xclang -fopenmp -I$(LIB_FLAGS) -L$(LIB_FLAGS_LINK) -lomp
 else ifeq ($(UNAME),Linux)
 	CFLAGS += -fopenmp
 endif

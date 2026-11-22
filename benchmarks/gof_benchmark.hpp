@@ -18,5 +18,4 @@ static void BM_GOF(State& state){
     free(gen_next);
 }
 
-//BENCHMARK(BM_GOF) -> ThreadRange(1, thread::hardware_concurrency());
-
+BENCHMARK(BM_GOF) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime();
