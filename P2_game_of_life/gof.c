@@ -51,7 +51,7 @@ void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *ge
    
     omp_set_num_threads(threads);
 
-    //#pragma omp parallel for schedule(guided)
+   #pragma omp parallel for 
     for(int i = dim_x / per_bit; i < ((dim_y - 1) * dim_x) / per_bit; i++){
         int offset = (dim_x / per_bit); // find nex / prev columns
 
@@ -79,6 +79,7 @@ void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *ge
 
         //printf("(%d %d) ", stage2.res, stage2.carry);
     }
+    #pragma omp barrier
 }
 
 

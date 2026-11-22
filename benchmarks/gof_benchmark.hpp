@@ -12,7 +12,7 @@ static void BM_GOF(State& state){
     char *gen_next = (char *)malloc(SizeBuf);
 
     for(auto _ : state) 
-        print_gen(gen, gen_next); 
+        print_gen(gen, gen_next, static_cast<int>(state.range(0))); 
 
     free(gen);
     free(gen_next);
