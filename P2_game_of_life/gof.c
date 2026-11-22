@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 
-void print(const char *gen, uint8_t dim_y, uint8_t dim_x, uint8_t per_bit){
+void print(const char *gen, unsigned int dim_y, unsigned int dim_x, uint8_t per_bit){
     printf("%d %d \n", dim_y, dim_y);
     for(int i = 0; i < dim_y; i++){
         for(int j = 0; j < dim_x; j++){
@@ -47,7 +47,7 @@ struct Sum full_adder(uint8_t a, uint8_t b, uint8_t c_in){
     return s;
 }
 
-void next(uint8_t dim_y, uint8_t dim_x, char *gen_next, const char *gen, uint8_t per_bit){
+void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *gen, uint8_t per_bit){
     #pragma omp parallel for
     for(int i = dim_x / per_bit; i < ((dim_y - 1) * dim_x) / per_bit; i++){
         int offset = (dim_x / per_bit); // find nex / prev columns
@@ -89,6 +89,7 @@ void print_gen(char *gen, char *gen_next, unsigned int threads){
 
     omp_set_num_threads(threads);
 
+    #pragma omp parallel for schedule(guided)
     for(int i = 0; i < G; i++){
         //printf("%s %dth Generation Begins %s", SEP, i, SEP);
 
