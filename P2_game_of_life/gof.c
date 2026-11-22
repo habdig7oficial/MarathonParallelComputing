@@ -89,10 +89,6 @@ void process(char *gen_next, const char *gen, unsigned int threads){
 
 
 void print_gen(char *gen, char *gen_next, unsigned int threads){
-
-    omp_set_num_threads(threads);
-
-    
     for(int i = 0; i < G; i++){
         //printf("%s %dth Generation Begins %s", SEP, i, SEP);
 
