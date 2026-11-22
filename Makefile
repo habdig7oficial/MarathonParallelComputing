@@ -9,9 +9,9 @@ UNAME := $(shell uname -s)
 
 CFLAGS ?= -O3 -Wall 
 
-ifeq (UNAME, Darwin)
+ifeq ($(UNAME),Darwin)
 	CFLAGS += -Xclang -fopenmp
-else ifeq (UNAME, Linux)
+else ifeq ($(UNAME),Linux)
 	CFLAGS += -fopenmp
 endif
 
