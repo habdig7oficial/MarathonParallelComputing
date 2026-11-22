@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <omp.h>
 
 typedef unsigned char cell_t;
 
@@ -22,13 +23,16 @@ void free_board(cell_t **b, int n) {
     free(b);
 }
 
-int adjacent_to(cell_t **b, int n, int i, int j) {
+int adjacent_to(cell_t **b, int n, int i, int j, unsigned int threads) {
+    omp_set_num_threads(threads);
+
     int sk = (i > 0) ? i - 1 : i;
     int ek = (i + 1 < n) ? i + 1 : i;
     int sl = (j > 0) ? j - 1 : j;
     int el = (j + 1 < n) ? j + 1 : j;
     int count = 0;
     int k, l;
+
     for (k = sk; k <= ek; k++) {
         for (l = sl; l <= el; l++) {
             count += b[k][l];
@@ -37,11 +41,13 @@ int adjacent_to(cell_t **b, int n, int i, int j) {
     return count - b[i][j];
 }
 
-void play(cell_t **cur, cell_t **nxt, int n) {
+void play(cell_t **cur, cell_t **nxt, int n, unsigned int threads) {
     int i, j;
+
+    #pragma omp parallel for collapse(2) private(i, j)
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
-            int a = adjacent_to(cur, n, i, j);
+            int a = adjacent_to(cur, n, i, j, threads);
             if (a == 2) {
                 nxt[i][j] = cur[i][j];
             } else if (a == 3) {

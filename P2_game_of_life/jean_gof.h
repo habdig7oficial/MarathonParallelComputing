@@ -12,7 +12,7 @@ typedef unsigned char cell_t;
 
 cell_t **alloc_board(int n);
 void free_board(cell_t **b, int n);
-void play(cell_t **cur, cell_t **nxt, int n);
+void play(cell_t **cur, cell_t **nxt, int n, unsigned int threads);
 
 #ifdef __cplusplus
 }

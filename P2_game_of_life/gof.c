@@ -47,7 +47,7 @@ struct Sum full_adder(uint8_t a, uint8_t b, uint8_t c_in){
     return s;
 }
 
-void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *gen, uint8_t per_bit, unsigned int threads, unsigned int tile){
+void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *gen, uint8_t per_bit, unsigned int threads){
    
     omp_set_num_threads(threads);
 
@@ -82,18 +82,18 @@ void next(unsigned int dim_y, unsigned int dim_x, char *gen_next, const char *ge
 }
 
 
-void process(char *gen_next, const char *gen, unsigned int threads, unsigned int tile){
+void process(char *gen_next, const char *gen, unsigned int threads){
     //print(gen, SizeY, SizeX, CHAR_BIT);
-    next(SizeY, SizeX, gen_next, gen, CHAR_BIT, threads, tile);
+    next(SizeY, SizeX, gen_next, gen, CHAR_BIT, threads);
 }
 
 
-void print_gen(char *gen, char *gen_next, unsigned int threads, unsigned int tile){
+void print_gen(char *gen, char *gen_next, unsigned int threads){
     for(int i = 0; i < G; i++){
         //printf("%s %dth Generation Begins %s", SEP, i, SEP);
 
         //printf("%p %p", gen, gen_next);
-        process(gen_next, gen, threads, tile);
+        process(gen_next, gen, threads);
 
         char *aux;
         aux = gen;
