@@ -38,8 +38,8 @@ static void BM_GOF(State& state){
     free(gen_next);
 }
 
-//BENCHMARK(BM_GOF) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime() -> Complexity();
-BENCHMARK(BM_GOF) -> DenseRange(1, 1) -> UseRealTime() -> Complexity();
+BENCHMARK(BM_GOF) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime() -> Complexity();
+//BENCHMARK(BM_GOF) -> DenseRange(1, 1) -> UseRealTime() -> Complexity();
 
 static void BM_GOF_Unpacked(State& state) {
     int threads = static_cast<int>(state.range(0));
@@ -82,5 +82,5 @@ static void BM_GOF_Unpacked(State& state) {
     free_board(nxt, n);
 }
 
-//BENCHMARK(BM_GOF_Unpacked) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime() -> Complexity();
-BENCHMARK(BM_GOF_Unpacked) -> DenseRange(1, 1) -> UseRealTime() -> Complexity();
+BENCHMARK(BM_GOF_Unpacked) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime() -> Complexity();
+//BENCHMARK(BM_GOF_Unpacked) -> DenseRange(1, 1) -> UseRealTime() -> Complexity();

@@ -15,4 +15,4 @@ static void BM_PIC(State& state){
         DoNotOptimize(pi_val);
     }
 }
-//BENCHMARK(BM_PIC) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime();
+BENCHMARK(BM_PIC) -> DenseRange(1, thread::hardware_concurrency()) -> UseRealTime();

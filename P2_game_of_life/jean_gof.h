@@ -1,5 +1,3 @@
-// Modified baseline done by Gemini https://share.gemini.google/NbPW0c2ZsR3V
-
 /* gol_baseline.h */
 #ifndef GOL_BASELINE_H
 #define GOL_BASELINE_H

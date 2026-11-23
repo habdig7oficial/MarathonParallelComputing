@@ -1,5 +1,3 @@
-// Modified baseline done by Gemini https://share.gemini.google/NbPW0c2ZsR3V
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>

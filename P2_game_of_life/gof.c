@@ -113,10 +113,13 @@ void next(unsigned int dim_y, unsigned int dim_x, uint8_t *gen_next, const uint8
     // Main board (Rows 1 to dim_y - 2)
     #pragma omp parallel for schedule(guided)
     for(int row = 1; row < dim_y - 1; row++){
-        int base = row * offset;
+        int base = row * offset; // Calc the correct row
 
         // --- Left Boundary (col = 0) ---
         {
+            // offset finds prev/next
+            // shift by 1 finds the neighbor on the row
+            // shift by 7 find the correspondent cross bit in the another integet
             int i = base;
             struct Sum s1 = full_adder(
                 gen[i - offset] << 1, 
