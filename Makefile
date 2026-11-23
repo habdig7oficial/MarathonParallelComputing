@@ -29,3 +29,8 @@ run_final: benchmark
 
 run_test: benchmark
 	./benchmark --benchmark_min_warmup_time=1 --benchmark_repetitions=10 --benchmark_report_aggregates_only=true --benchmark_out=benchmark.json --benchmark_out_format=json
+
+
+
+test_gof: compile
+	$(C) $(CFLAGS) test_gof.c life life_jean -o test_gof
