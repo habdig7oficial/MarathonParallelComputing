@@ -50,122 +50,284 @@ struct Sum full_adder(uint8_t a, uint8_t b, uint8_t c_in){
 void next(unsigned int dim_y, unsigned int dim_x, uint8_t *gen_next, const uint8_t *gen, uint8_t per_bit, unsigned int threads){
    
     omp_set_num_threads(threads);
+    int offset = (dim_x / per_bit);
 
-    // Main board
-   #pragma omp parallel for schedule(guided)
-    for(int i = dim_x / per_bit; i < ((dim_y - 1) * dim_x) / per_bit; i++){
+    // ==========================================
+    // SPECIAL CASE: offset == 1 (Board width is 1 byte)
+    // ==========================================
+    if (offset == 1) {
+        // Main board (Rows 1 to dim_y - 2)
+        #pragma omp parallel for schedule(guided)
+        for(int row = 1; row < dim_y - 1; row++){
+            int i = row;
+            struct Sum s1 = full_adder(gen[i - 1] << 1, gen[i - 1], gen[i - 1] >> 1);
+            struct Sum s2 = full_adder(gen[i] << 1, gen[i] >> 1, gen[i + 1] << 1);
+            struct Sum s3 = full_adder(gen[i + 1], gen[i + 1] >> 1, 0);
+            
+            struct Sum stage2 = full_adder(s1.res, s2.res, s3.res);
+            struct Sum stage3 = full_adder(s1.carry, s2.carry, s3.carry);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
 
+            uint8_t c0 = stage2.res;
+            uint8_t c1 = stage4.res;
+            uint8_t c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
 
-        int offset = (dim_x / per_bit); // find nex / prev columns
-        int col = i % offset;           // find column byte index
+        // Border Top (row = 0)
+        #pragma omp parallel for schedule(static)
+        for(int row = 0; row < 1; row++) {
+            int i = 0;
+            struct Sum s2 = full_adder(gen[i] << 1, gen[i] >> 1, gen[i + 1] << 1);
+            struct Sum s3 = full_adder(gen[i + 1], gen[i + 1] >> 1, 0);
+            struct Sum stage2 = full_adder(0, s2.res, s3.res);
+            struct Sum stage3 = full_adder(0, s2.carry, s3.carry);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
 
-        /* 
-        offset gets the prev/next col 
-        shifting by 7 get the correspondent pixel in the another row
-        when out of bounds switch by 0
-        */
-        struct Sum s1 = full_adder(
-            (gen[i - offset] << 1) | (col > 0 ? gen[i - offset - 1] >> 7 : 0), 
-            gen[i - offset], 
-            (gen[i - offset] >> 1) | (col < offset - 1 ? gen[i - offset + 1] << 7 : 0)
-        );
-        
-        struct Sum s2 = full_adder(
-            (gen[i] << 1) | (col > 0 ? gen[i - 1] >> 7 : 0), 
-            (gen[i] >> 1) | (col < offset - 1 ? gen[i + 1] << 7 : 0), 
-            (gen[i + offset] << 1) | (col > 0 ? gen[i + offset - 1] >> 7 : 0)
-        );
-        
-        struct Sum s3 = full_adder(
-            gen[i + offset], 
-            (gen[i + offset] >> 1) | (col < offset - 1 ? gen[i + offset + 1] << 7 : 0), 
-            0
-        ); // half adder
-        
-        struct Sum stage2 = full_adder(s1.res, s2.res, s3.res);
-
-        struct Sum stage3 = full_adder(s1.carry, s2.carry, s3.carry);
-        struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
-
-        uint8_t c0 = stage2.res;
-        uint8_t c1 = stage4.res;
-        uint8_t c2 = stage4.carry | stage3.carry;
-
-
-        int is2or3 = ~c2 & c1;
-
-        uint8_t survives = gen[i] & is2or3;
-        uint8_t biths = ~gen[i] & (is2or3 & c0); // is 3
-
-        gen_next[i] = survives | biths;
+        // Border Bottom (row = dim_y - 1)
+        #pragma omp parallel for schedule(static)
+        for(int row = dim_y - 1; row < dim_y; row++) {
+            int base = (dim_y - 1); // Fixed: base defined correctly for offset == 1
+            int i = base;
+            struct Sum s1 = full_adder(gen[i - 1] << 1, gen[i - 1], gen[i - 1] >> 1);
+            struct Sum s2 = full_adder(gen[i] << 1, gen[i] >> 1, 0);
+            struct Sum stage2 = full_adder(s1.res, s2.res, 0);
+            struct Sum stage3 = full_adder(s1.carry, s2.carry, 0);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
+        return;
     }
 
-    // Border Top
-    #pragma omp parallel for schedule(static)
-    for(int i = 0; i < dim_x / per_bit; i++) {
-        int offset = (dim_x / per_bit);
-        int col = i % offset;
-        
-        struct Sum s2 = full_adder(
-            (gen[i] << 1) | (col > 0 ? gen[i - 1] >> 7 : 0), 
-            (gen[i] >> 1) | (col < offset - 1 ? gen[i + 1] << 7 : 0), 
-            (gen[i + offset] << 1) | (col > 0 ? gen[i + offset - 1] >> 7 : 0)
-        );
-        
-        struct Sum s3 = full_adder(
-            gen[i + offset], 
-            (gen[i + offset] >> 1) | (col < offset - 1 ? gen[i + offset + 1] << 7 : 0), 
-            0
-        );
-        
-        struct Sum stage2 = full_adder(0, s2.res, s3.res);
-        struct Sum stage3 = full_adder(0, s2.carry, s3.carry);
-        struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+    // ==========================================
+    // GENERAL CASE: offset >= 2 (Fully branch-free inner columns)
+    // ==========================================
 
-        uint8_t c0 = stage2.res;
-        uint8_t c1 = stage4.res;
-        uint8_t c2 = stage4.carry | stage3.carry;
+    // Main board (Rows 1 to dim_y - 2)
+    #pragma omp parallel for schedule(guided)
+    for(int row = 1; row < dim_y - 1; row++){
+        int base = row * offset;
 
-        int is2or3 = ~c2 & c1;
+        // --- Left Boundary (col = 0) ---
+        {
+            int i = base;
+            struct Sum s1 = full_adder(
+                gen[i - offset] << 1, 
+                gen[i - offset], 
+                (gen[i - offset] >> 1) | (gen[i - offset + 1] << 7)
+            );
+            struct Sum s2 = full_adder(
+                gen[i] << 1, 
+                (gen[i] >> 1) | (gen[i + 1] << 7), 
+                gen[i + offset] << 1
+            );
+            struct Sum s3 = full_adder(
+                gen[i + offset], 
+                (gen[i + offset] >> 1) | (gen[i + offset + 1] << 7), 
+                0
+            );
+            struct Sum stage2 = full_adder(s1.res, s2.res, s3.res);
+            struct Sum stage3 = full_adder(s1.carry, s2.carry, s3.carry);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
 
-        uint8_t survives = gen[i] & is2or3;
-        uint8_t births = ~gen[i] & (is2or3 & c0);
+        // --- Middle Columns (col = 1 to offset - 2) ---
+        for(int col = 1; col < offset - 1; col++){
+            int i = base + col;
+            struct Sum s1 = full_adder(
+                (gen[i - offset] << 1) | (gen[i - offset - 1] >> 7), 
+                gen[i - offset], 
+                (gen[i - offset] >> 1) | (gen[i - offset + 1] << 7)
+            );
+            struct Sum s2 = full_adder(
+                (gen[i] << 1) | (gen[i - 1] >> 7), 
+                (gen[i] >> 1) | (gen[i + 1] << 7), 
+                (gen[i + offset] << 1) | (gen[i + offset - 1] >> 7)
+            );
+            struct Sum s3 = full_adder(
+                gen[i + offset], 
+                (gen[i + offset] >> 1) | (gen[i + offset + 1] << 7), 
+                0
+            );
+            struct Sum stage2 = full_adder(s1.res, s2.res, s3.res);
+            struct Sum stage3 = full_adder(s1.carry, s2.carry, s3.carry);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
 
-        gen_next[i] = survives | births;
+        // --- Right Boundary (col = offset - 1) ---
+        {
+            int i = base + offset - 1;
+            struct Sum s1 = full_adder(
+                (gen[i - offset] << 1) | (gen[i - offset - 1] >> 7), 
+                gen[i - offset], 
+                gen[i - offset] >> 1
+            );
+            struct Sum s2 = full_adder(
+                (gen[i] << 1) | (gen[i - 1] >> 7), 
+                gen[i] >> 1, 
+                (gen[i + offset] << 1) | (gen[i + offset - 1] >> 7)
+            );
+            struct Sum s3 = full_adder(
+                gen[i + offset], 
+                gen[i + offset] >> 1, 
+                0
+            );
+            struct Sum stage2 = full_adder(s1.res, s2.res, s3.res);
+            struct Sum stage3 = full_adder(s1.carry, s2.carry, s3.carry);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
     }
 
-    // Border Bottom
+    // Border Top (row = 0)
     #pragma omp parallel for schedule(static)
-    for(int i = (dim_y - 1) * (dim_x / per_bit); i < dim_y * (dim_x / per_bit); i++) {
-        int offset = (dim_x / per_bit);
-        int col = i % offset;
-        
-        struct Sum s1 = full_adder(
-            (gen[i - offset] << 1) | (col > 0 ? gen[i - offset - 1] >> 7 : 0), 
-            gen[i - offset], 
-            (gen[i - offset] >> 1) | (col < offset - 1 ? gen[i - offset + 1] << 7 : 0)
-        );
-        
-        struct Sum s2 = full_adder(
-            (gen[i] << 1) | (col > 0 ? gen[i - 1] >> 7 : 0), 
-            (gen[i] >> 1) | (col < offset - 1 ? gen[i + 1] << 7 : 0), 
-            0
-        );
-        
-        struct Sum stage2 = full_adder(s1.res, s2.res, 0);
-        struct Sum stage3 = full_adder(s1.carry, s2.carry, 0);
-        struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+    for(int row = 0; row < 1; row++) {
+        // Left boundary col = 0
+        {
+            int i = 0;
+            struct Sum s2 = full_adder(
+                gen[i] << 1, 
+                (gen[i] >> 1) | (gen[i + 1] << 7), 
+                gen[i + offset] << 1
+            );
+            struct Sum s3 = full_adder(
+                gen[i + offset], 
+                (gen[i + offset] >> 1) | (gen[i + offset + 1] << 7), 
+                0
+            );
+            struct Sum stage2 = full_adder(0, s2.res, s3.res);
+            struct Sum stage3 = full_adder(0, s2.carry, s3.carry);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
 
-        uint8_t c0 = stage2.res;
-        uint8_t c1 = stage4.res;
-        uint8_t c2 = stage4.carry | stage3.carry;
+        // Middle columns
+        for(int col = 1; col < offset - 1; col++) {
+            int i = col;
+            struct Sum s2 = full_adder(
+                (gen[i] << 1) | (gen[i - 1] >> 7), 
+                (gen[i] >> 1) | (gen[i + 1] << 7), 
+                (gen[i + offset] << 1) | (gen[i + offset - 1] >> 7)
+            );
+            struct Sum s3 = full_adder(
+                gen[i + offset], 
+                (gen[i + offset] >> 1) | (gen[i + offset + 1] << 7), 
+                0
+            );
+            struct Sum stage2 = full_adder(0, s2.res, s3.res);
+            struct Sum stage3 = full_adder(0, s2.carry, s3.carry);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
 
-        int is2or3 = ~c2 & c1;
+        // Right boundary col = offset - 1
+        {
+            int i = offset - 1;
+            struct Sum s2 = full_adder(
+                (gen[i] << 1) | (gen[i - 1] >> 7), 
+                gen[i] >> 1, 
+                (gen[i + offset] << 1) | (gen[i + offset - 1] >> 7)
+            );
+            struct Sum s3 = full_adder(
+                gen[i + offset], 
+                gen[i + offset] >> 1, 
+                0
+            );
+            struct Sum stage2 = full_adder(0, s2.res, s3.res);
+            struct Sum stage3 = full_adder(0, s2.carry, s3.carry);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
+    }
 
-        uint8_t survives = gen[i] & is2or3;
-        uint8_t births = ~gen[i] & (is2or3 & c0);
+    // Border Bottom (row = dim_y - 1)
+    #pragma omp parallel for schedule(static)
+    for(int row = dim_y - 1; row < dim_y; row++) {
+        int base = (dim_y - 1) * offset;
 
-        gen_next[i] = survives | births;
+        // Left boundary col = 0
+        {
+            int i = base;
+            struct Sum s1 = full_adder(
+                gen[i - offset] << 1, 
+                gen[i - offset], 
+                (gen[i - offset] >> 1) | (gen[i - offset + 1] << 7)
+            );
+            struct Sum s2 = full_adder(
+                gen[i] << 1, 
+                (gen[i] >> 1) | (gen[i + 1] << 7), 
+                0
+            );
+            struct Sum stage2 = full_adder(s1.res, s2.res, 0);
+            struct Sum stage3 = full_adder(s1.carry, s2.carry, 0);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
+
+        // Middle columns
+        for(int col = 1; col < offset - 1; col++) {
+            int i = base + col;
+            struct Sum s1 = full_adder(
+                (gen[i - offset] << 1) | (gen[i - offset - 1] >> 7), 
+                gen[i - offset], 
+                (gen[i - offset] >> 1) | (gen[i - offset + 1] << 7)
+            );
+            struct Sum s2 = full_adder(
+                (gen[i] << 1) | (gen[i - 1] >> 7), 
+                (gen[i] >> 1) | (gen[i + 1] << 7), 
+                0
+            );
+            struct Sum stage2 = full_adder(s1.res, s2.res, 0);
+            struct Sum stage3 = full_adder(s1.carry, s2.carry, 0);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
+
+        // Right boundary col = offset - 1
+        {
+            int i = base + offset - 1;
+            struct Sum s1 = full_adder(
+                (gen[i - offset] << 1) | (gen[i - offset - 1] >> 7), 
+                gen[i - offset], 
+                gen[i - offset] >> 1
+            );
+            struct Sum s2 = full_adder(
+                (gen[i] << 1) | (gen[i - 1] >> 7), 
+                gen[i] >> 1, 
+                0
+            );
+            struct Sum stage2 = full_adder(s1.res, s2.res, 0);
+            struct Sum stage3 = full_adder(s1.carry, s2.carry, 0);
+            struct Sum stage4 = full_adder(stage3.res, stage2.carry, 0);
+            uint8_t c0 = stage2.res, c1 = stage4.res, c2 = stage4.carry | stage3.carry;
+            int is2or3 = ~c2 & c1;
+            gen_next[i] = (gen[i] & is2or3) | (~gen[i] & (is2or3 & c0));
+        }
     }
 }
 
