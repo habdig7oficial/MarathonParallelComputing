@@ -11,17 +11,17 @@ using namespace benchmark;
 
 extern unsigned int seed;
 
-static void fill_random(char *buf, size_t num_bytes, unsigned int seed) {
+static void fill_random(uint8_t *buf, size_t num_bytes, unsigned int seed) {
     mt19937 rand(seed);
     uniform_int_distribution<> dist(0, 255);
     for (size_t i = 0; i < num_bytes; i++) 
-        buf[i] = static_cast<char>(dist(rand));
+        buf[i] = static_cast<uint8_t>(dist(rand));
     
 }
 
 static void BM_GOF(State& state){ 
-    char *gen = (char *)malloc(SizeBuf);
-    char *gen_next = (char *)malloc(SizeBuf);
+    uint8_t *gen = (uint8_t *)malloc(SizeBuf);
+    uint8_t *gen_next = (uint8_t *)malloc(SizeBuf);
 
     fill_random(gen, SizeBuf, seed);
 
@@ -48,7 +48,7 @@ static void BM_GOF_Unpacked(State& state) {
     int n = SizeY; // Assuming SizeY == SizeX (square grid)
     
     // SizeBuf should match what Version 1 uses
-    char *packed_init = (char *)malloc(SizeBuf);
+    uint8_t *packed_init = (uint8_t *)malloc(SizeBuf);
     fill_random(packed_init, SizeBuf, seed);
 
     cell_t **cur = alloc_board(n);
@@ -57,7 +57,7 @@ static void BM_GOF_Unpacked(State& state) {
     size_t bit_idx = 0;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            unsigned char byte = static_cast<unsigned char>(packed_init[bit_idx / 8]);
+            uint8_t byte = static_cast<uint8_t>(packed_init[bit_idx / 8]);
             cur[i][j] = (byte >> (bit_idx % 8)) & 1;
             nxt[i][j] = 0;
             bit_idx++;
